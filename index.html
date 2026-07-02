@@ -90,7 +90,15 @@
             </div>
         <button type="button" class="btn-success" onclick="addItemRow()">+ 품목 추가</button>
         
-        <button class="btn-submit" onclick="downloadPDF()">PDF 파일로 저장하기</button>
+        <div class="form-group" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+    <button type="button" onclick="downloadImage()" style="width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 4px; font-size: 18px; font-weight: bold; cursor: pointer;">
+        📸 이미지(JPG)로 저장
+    </button>
+    
+    <button class="btn-submit" onclick="downloadPDF()">
+        📄 PDF 파일로 저장하기
+    </button>
+</div>
     </div>
 
     <div id="preview-container">
@@ -279,6 +287,33 @@
     };
     
     html2pdf().set(opt).from(element).save();
+}
+function downloadImage() {
+    const element = document.getElementById('pdf-template');
+    const compName = inputCompany.value || '무명';
+    
+    // html2pdf 내부 엔진을 실행할 때, 캡처 옵션(html2canvas)을 명시적으로 전달합니다.
+    html2pdf()
+        .from(element)
+        .set({
+            html2canvas: {
+                scale: 2,       // 선명도 유지
+                useCORS: true,  // 이미지 보안 허용
+                scrollY: 0,     // ⚠️ 핵심: 캡처 시 상단이 잘리거나 밀리는 현상 방지
+                scrollX: 0      // ⚠️ 핵심: 가로 밀림 방지
+            }
+        })
+        .toImg()
+        .outputImg('dataurl')
+        .then(function(imgDataUrl) {
+            const link = document.createElement('a');
+            link.href = imgDataUrl;
+            link.download = `견적서_${compName}_${new Date().toISOString().slice(0,10)}.jpg`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
 }
     </script>
 </body>
